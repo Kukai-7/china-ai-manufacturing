@@ -174,38 +174,5 @@ fig.text(.05, .02, 'Curated list for illustration, not a ranking or a complete c
 plt.subplots_adjust(left=.13, right=.98, top=.85, bottom=.16)
 fig.savefig('out/assets/companies_by_cluster.png', facecolor=PAPER); plt.close(fig)
 
-# ------------------------------------------------------------------ 6. scatter-plot matrix across the 31 provinces
-V = [('gdp_per_capita_cny_2025', 'GDP per person\n2025 (k yuan, log)', lambda x: np.log10(x / 1e3)),
-     ('rd_intensity_pct_2024', 'R&D, % of GDP\n2024', lambda x: x),
-     ('rd_spending_cny_100m_2024', 'R&D spending\n2024 (100m yuan, log)', lambda x: np.log10(x)),
-     ('gdp_nominal_cagr_2020_2025_pct', 'Nominal GDP growth\n2020 to 2025 (%/yr)', lambda x: x)]
-X = pd.DataFrame({k: f(pv[k]) for k, _, f in V}); isc = pv.cluster.notna().values
-TK = {0: [50, 100, 200], 2: [10, 100, 1000, 5000]}
-n = len(V)
-fig, axs = plt.subplots(n, n, figsize=(11, 11))
-for i in range(n):
-    for j in range(n):
-        ax = axs[i, j]; xi, yj = X.iloc[:, j], X.iloc[:, i]
-        if i == j:
-            ax.hist(xi, bins=10, color=LIGHT, ec=PAPER); ax.set_yticks([])
-            for v in xi[isc]: ax.axvline(v, color=RED, lw=1)
-        else:
-            ax.scatter(xi[~isc], yj[~isc], s=16, c=BLUE_SOFT, ec=BLUE, lw=.5)
-            ax.scatter(xi[isc], yj[isc], s=34, c=RED, ec=PAPER, lw=.6, zorder=3)
-            r = np.corrcoef(xi, yj)[0, 1]
-            ax.text(.04, .92, f'r = {r:.2f}', transform=ax.transAxes, fontsize=7.5, color=MID)
-            if i == 1 and j == 0:
-                for k in np.where(isc)[0]: ax.annotate(pv.province[k], (xi[k], yj[k]), xytext=(-5, 3) if pv.province[k] == 'Beijing' else (4, 3), ha='right' if pv.province[k] == 'Beijing' else 'left', textcoords='offset points', fontsize=7, color=RED)
-        for s_ in ('top', 'right'): ax.spines[s_].set_visible(False)
-        ax.tick_params(labelsize=7, length=2)
-        if j in TK: ax.set_xticks(np.log10(TK[j])); ax.set_xticklabels(TK[j])
-        if i in TK and i != j: ax.set_yticks(np.log10(TK[i])); ax.set_yticklabels(TK[i])
-        if i < n - 1: ax.set_xticklabels([])
-        if j > 0 and i != j: ax.set_yticklabels([])
-        if i == n - 1: ax.set_xlabel(V[j][1], fontsize=8.5)
-        if j == 0: ax.set_ylabel(V[i][1], fontsize=8.5)
-title(fig, 'Rich provinces spend more on research', 'Scatter-plot matrix of the 31 provinces. Red: Beijing, Guangdong and Zhejiang. r is the Pearson correlation on the plotted scale.', y=.965)
-fig.text(.05, .015, 'Data: NBS (R&D 2024), provincial GDP from NBS via Wikipedia. Correlation, not causation; 31 points only.', fontsize=7, color=MID)
-plt.subplots_adjust(left=.1, right=.97, top=.89, bottom=.08, hspace=.12, wspace=.12)
-fig.savefig('out/assets/scatter_matrix_provinces.png', facecolor=PAPER); plt.close(fig)
+# ------------------------------------------------------------------ 6. scatter-plot matrix: made by correlations.py, with r, confidence intervals and p-values
 print(sorted(os.listdir('out/assets')))
