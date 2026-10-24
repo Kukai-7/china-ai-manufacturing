@@ -10,6 +10,8 @@ It was prompted by the CFA Institute article [Where AI meets manufacturing: Chin
 
 ![Where China spends on research](https://huggingface.co/datasets/Kukai-7/china-ai-manufacturing/resolve/main/assets/map_rd_clusters.png)
 
+*Reading the map: the darker the province, the larger its R&D spending as a share of GDP in 2024; red circles mark the three cluster cities. Research spending is concentrated on the east coast and in Beijing.*
+
 ## At a glance
 
 | | |
@@ -32,13 +34,54 @@ It was prompted by the CFA Institute article [Where AI meets manufacturing: Chin
 
 ![Robots and the workforce](https://huggingface.co/datasets/Kukai-7/china-ai-manufacturing/resolve/main/assets/robots_and_workforce.png)
 
+*Reading the chart: left, industrial robots installed each year, China in red against the rest of the world, with China's share above the bars; right, China's population aged 15 to 64. China has installed more robots than the rest of the world combined since 2021, as its workforce passed its peak.*
+
 ![China against its peers](https://huggingface.co/datasets/Kukai-7/china-ai-manufacturing/resolve/main/assets/china_vs_peers.png)
+
+*Reading the chart: four indicators for China and four industrial peers, each line ending at its latest value. China leads in manufacturing output and patent filings, and is catching up but still behind in R&D intensity and researchers per person.*
 
 ![Three clusters compared](https://huggingface.co/datasets/Kukai-7/china-ai-manufacturing/resolve/main/assets/clusters_compared.png)
 
+*Reading the chart: the provinces behind the three clusters on four measures; dashed lines are national values. Beijing leads on research intensity and income, Guangdong on the size of its R&D, Zhejiang on growth.*
+
 ![Who builds what](https://huggingface.co/datasets/Kukai-7/china-ai-manufacturing/resolve/main/assets/companies_by_cluster.png)
 
+*Reading the chart: each marker is a company, placed at its founding year; the marker shape gives the segment. Platforms and hardware date from the 1990s and 2000s; robots, chips and models mostly after 2015.*
+
 ![Scatter-plot matrix of the provinces](https://huggingface.co/datasets/Kukai-7/china-ai-manufacturing/resolve/main/assets/scatter_matrix_provinces.png)
+
+*Reading the chart: see "Reading the correlations" below. Income, R&D intensity and R&D spending rise together; recent growth does not follow any of them.*
+
+## Reading the correlations
+
+**How to read r.** Pearson's r measures how closely two variables move along a straight line: +1 is a perfect positive line, 0 no linear link, -1 a perfect negative line. r² is the share of the variance of one variable that a straight line on the other accounts for (r = 0.7 means about half). The labels used here: under 0.1 negligible, 0.1 to 0.3 weak, 0.3 to 0.5 moderate, 0.5 to 0.7 strong, 0.7 and above very strong.
+
+**How sure is it?** The 95% confidence interval gives the range of r compatible with the data; when it excludes zero, p is below 0.05 and the link is distinguishable from chance. Strength and certainty are different things: a weak r can be certain with many observations, and a strong r can be uncertain with few. Spearman's ρ repeats the exercise on ranks, so a large gap between r and ρ points to outliers or a curved relationship.
+
+In the scatter-plot matrix (`scatter_matrix_provinces.png`), the panels below the diagonal show the points with a least-squares line, the diagonal shows each distribution, and the panels above the diagonal give r, its 95% confidence interval, p and n for the pair in that row and column. A figure is in colour only when p < 0.05.
+
+**What stands out**
+
+- **Richer provinces spend a larger share of GDP on research: r = +0.81 (95% CI +0.63 to +0.90)**, so income accounts for about two thirds of the variance in R&D intensity across the 31 provinces. Beijing sits above the line, at 6.6%.
+- **R&D intensity and R&D spending go together (+0.77)**: the provinces that spend the most are also the ones that spend the largest share.
+- **None of them predicts growth from 2020 to 2025.** The correlations with nominal growth are weak (-0.30 to +0.17) and all intervals include zero: the fastest-growing provinces were often poorer, inland ones.
+
+**All pairs**, sorted by the size of r. The same figures are in the `correlations` configuration.
+
+| Pair | r | 95% CI | p | n | Spearman ρ | Reading |
+|---|---|---|---|---|---|---|
+| GDP per person 2025 (thousand yuan, log) × R&D 2024 (% of GDP) | **+0.81** | +0.63 to +0.90 | < 0.001 | 31 | +0.70 | very strong, positive; distinguishable from zero |
+| R&D 2024 (% of GDP) × R&D spending 2024 (100m yuan, log) | **+0.77** | +0.57 to +0.88 | < 0.001 | 31 | +0.87 | very strong, positive; distinguishable from zero |
+| GDP per person 2025 (thousand yuan, log) × R&D spending 2024 (100m yuan, log) | **+0.58** | +0.28 to +0.77 | < 0.001 | 31 | +0.66 | strong, positive; distinguishable from zero |
+| R&D spending 2024 (100m yuan, log) × Nominal GDP growth 2020 to 2025 (% a year) | **-0.30** | -0.59 to +0.07 | 0.11 | 31 | -0.18 | weak, negative; not distinguishable from zero |
+| R&D 2024 (% of GDP) × Nominal GDP growth 2020 to 2025 (% a year) | **-0.20** | -0.52 to +0.17 | 0.28 | 31 | -0.20 | weak, negative; not distinguishable from zero |
+| GDP per person 2025 (thousand yuan, log) × Nominal GDP growth 2020 to 2025 (% a year) | **+0.17** | -0.19 to +0.50 | 0.35 | 31 | +0.26 | weak, positive; not distinguishable from zero |
+
+**What it does not say**
+
+- Thirty-one provinces of very different size are equal points here; Tibet and Guangdong weigh the same.
+- Nominal growth mixes real growth and prices.
+- R&D intensity is a proxy, not a measure of AI adoption, and no correlation here identifies a cause.
 
 ## Load it
 
@@ -84,6 +127,10 @@ City, Chinese name, province, coordinates of the city centre, a one-line profile
 
 Cluster, English and Chinese name, founding year, segment (AI models and cloud; chips and compute; robots and automation; vision and sensing; vehicles and devices; components and industrial internet), a short description and the Wikidata identifier when one exists.
 
+### `correlations`, 6 rows
+
+One row per pair of variables in the scatter-plot matrix: `x`, `y` and their labels, `n`, `pearson_r`, `r_squared`, `ci95_low`, `ci95_high` (Fisher z interval), `p_value` (two-sided t test), `spearman_rho`, `strength`, `direction`. Made by `correlations.py`.
+
 ## How it was built
 
 1. **National series.** [World Bank Open Data](https://data.worldbank.org/) API, downloaded in October 2026.
@@ -91,7 +138,7 @@ Cluster, English and Chinese name, founding year, segment (AI models and cloud; 
 3. **Provincial R&D.** National Bureau of Statistics of China, [2024 statistical bulletin on science and technology spending](https://www.stats.gov.cn/sj/zxfb/202509/t20250929_1961429.html) (published 29 September 2025); the provincial figures sum to the national total of 3,632.7 billion yuan.
 4. **Provincial GDP.** NBS figures as compiled in the Wikipedia lists of Chinese administrative divisions by GDP and GDP per capita (revisions 1358609842 and 1373819856); 2025 values are preliminary.
 5. **Companies.** Curated for this dataset from company websites and Wikipedia; Wikidata identifiers kept as references only.
-6. **Charts.** Python and Matplotlib; borders from Natural Earth. The pipeline is in this repository: `collect.py`, `build.py`, `viz.py`.
+6. **Charts.** Python and Matplotlib; borders from Natural Earth. The pipeline is in this repository: `collect.py`, `build.py`, `viz.py`. The correlation figures come from `correlations.py`, which reads only the published Parquet files.
 
 ## Limitations
 
